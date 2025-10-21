@@ -1,0 +1,431 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User and Authentication
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(SUPPORT)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders         Order[]
+  fulfillments   Fulfillment[]
+  returnRequests ReturnRequest[]
+  auditLogs      AuditLog[]
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  FULFILLMENT
+  SUPPORT
+}
+
+// Store Configuration
+model Store {
+  id               String   @id @default(uuid())
+  name             String
+  shopifyDomain    String   @unique
+  shopifyStoreId   String   @unique
+  accessToken      String
+  scopes           String
+  isActive         Boolean  @default(true)
+  lastSyncAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orders       Order[]
+  products     Product[]
+  inventoryItems InventoryItem[]
+}
+
+// Order Management
+model Order {
+  id                 String        @id @default(uuid())
+  shopifyOrderId     String?       @unique
+  orderNumber        String        @unique
+  storeId            String
+  customerId         String?
+  customerName       String
+  customerEmail      String?
+  customerPhone      String?
+  financialStatus    FinancialStatus
+  fulfillmentStatus  OrderFulfillmentStatus
+  orderStatus        OrderStatus   @default(PENDING)
+  totalAmount        Decimal       @db.Decimal(10, 2)
+  currency           String        @default("USD")
+  taxAmount          Decimal?      @db.Decimal(10, 2)
+  shippingAmount     Decimal?      @db.Decimal(10, 2)
+  discountAmount     Decimal?      @db.Decimal(10, 2)
+  tags               String[]
+  notes              String?
+  shippingAddress    Json?
+  billingAddress     Json?
+  isManualOrder      Boolean       @default(false)
+  cancelledAt        DateTime?
+  cancelReason       String?
+  processedAt        DateTime?
+  processedBy        String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  store            Store           @relation(fields: [storeId], references: [id])
+  orderItems       OrderItem[]
+  fulfillments     Fulfillment[]
+  returnRequests   ReturnRequest[]
+  processedByUser  User?           @relation(fields: [processedBy], references: [id])
+
+  @@index([storeId])
+  @@index([orderStatus])
+  @@index([fulfillmentStatus])
+  @@index([createdAt])
+}
+
+enum FinancialStatus {
+  PENDING
+  AUTHORIZED
+  PARTIALLY_PAID
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  VOIDED
+}
+
+enum OrderFulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  SCHEDULED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  ON_HOLD
+}
+
+// Order Items
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  productId       String?
+  sku             String?
+  name            String
+  quantity        Int
+  price           Decimal  @db.Decimal(10, 2)
+  totalAmount     Decimal  @db.Decimal(10, 2)
+  taxAmount       Decimal? @db.Decimal(10, 2)
+  discountAmount  Decimal? @db.Decimal(10, 2)
+  fulfillmentStatus OrderItemFulfillmentStatus @default(UNFULFILLED)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  order            Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product          Product?             @relation(fields: [productId], references: [id])
+  fulfillmentItems FulfillmentItem[]
+  returnItems      ReturnItem[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum OrderItemFulfillmentStatus {
+  UNFULFILLED
+  FULFILLED
+  RETURNED
+}
+
+// Product Catalog
+model Product {
+  id              String   @id @default(uuid())
+  shopifyProductId String? @unique
+  storeId         String
+  sku             String   @unique
+  name            String
+  description     String?
+  price           Decimal  @db.Decimal(10, 2)
+  compareAtPrice  Decimal? @db.Decimal(10, 2)
+  costPrice       Decimal? @db.Decimal(10, 2)
+  barcode         String?
+  weight          Decimal? @db.Decimal(10, 3)
+  weightUnit      String?  @default("kg")
+  imageUrl        String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  store          Store           @relation(fields: [storeId], references: [id])
+  orderItems     OrderItem[]
+  inventoryItems InventoryItem[]
+
+  @@index([storeId])
+  @@index([sku])
+}
+
+// Inventory Management
+model InventoryItem {
+  id                String   @id @default(uuid())
+  productId         String
+  storeId           String
+  warehouseId       String?
+  quantity          Int      @default(0)
+  reservedQuantity  Int      @default(0)
+  availableQuantity Int      @default(0)
+  reorderPoint      Int?
+  reorderQuantity   Int?
+  lastRestockedAt   DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  product   Product    @relation(fields: [productId], references: [id])
+  store     Store      @relation(fields: [storeId], references: [id])
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+
+  @@unique([productId, warehouseId])
+  @@index([productId])
+  @@index([storeId])
+}
+
+// Warehouse
+model Warehouse {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  address   Json?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inventoryItems InventoryItem[]
+  fulfillments   Fulfillment[]
+}
+
+// Fulfillment & Shipping
+model Fulfillment {
+  id                String            @id @default(uuid())
+  shopifyFulfillmentId String?        @unique
+  orderId           String
+  warehouseId       String?
+  status            FulfillmentStatus @default(PENDING)
+  trackingNumber    String?
+  trackingUrl       String?
+  carrier           String?
+  shippingMethod    String?
+  shippingLabel     String?
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  fulfilledBy       String?
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  warehouse        Warehouse?        @relation(fields: [warehouseId], references: [id])
+  fulfilledByUser  User?             @relation(fields: [fulfilledBy], references: [id])
+  fulfillmentItems FulfillmentItem[]
+
+  @@index([orderId])
+  @@index([status])
+}
+
+enum FulfillmentStatus {
+  PENDING
+  PROCESSING
+  READY_TO_SHIP
+  SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+model FulfillmentItem {
+  id            String   @id @default(uuid())
+  fulfillmentId String
+  orderItemId   String
+  quantity      Int
+  createdAt     DateTime @default(now())
+
+  fulfillment Fulfillment @relation(fields: [fulfillmentId], references: [id], onDelete: Cascade)
+  orderItem   OrderItem   @relation(fields: [orderItemId], references: [id])
+
+  @@unique([fulfillmentId, orderItemId])
+}
+
+// Returns & Refunds
+model ReturnRequest {
+  id             String        @id @default(uuid())
+  orderId        String
+  returnNumber   String        @unique
+  status         ReturnStatus  @default(PENDING)
+  reason         String
+  customerNotes  String?
+  internalNotes  String?
+  refundAmount   Decimal?      @db.Decimal(10, 2)
+  restockFee     Decimal?      @db.Decimal(10, 2)
+  refundMethod   String?
+  approvedBy     String?
+  approvedAt     DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  order         Order        @relation(fields: [orderId], references: [id])
+  approvedByUser User?       @relation(fields: [approvedBy], references: [id])
+  returnItems   ReturnItem[]
+
+  @@index([orderId])
+  @@index([status])
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RECEIVED
+  INSPECTING
+  COMPLETED
+  CANCELLED
+}
+
+model ReturnItem {
+  id              String   @id @default(uuid())
+  returnRequestId String
+  orderItemId     String
+  quantity        Int
+  condition       String?
+  createdAt       DateTime @default(now())
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  orderItem     OrderItem     @relation(fields: [orderItemId], references: [id])
+
+  @@unique([returnRequestId, orderItemId])
+}
+
+// Notifications
+model Notification {
+  id        String             @id @default(uuid())
+  type      NotificationType
+  channel   NotificationChannel
+  recipient String
+  subject   String?
+  message   String
+  metadata  Json?
+  status    NotificationStatus @default(PENDING)
+  sentAt    DateTime?
+  error     String?
+  createdAt DateTime           @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_FULFILLED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  RETURN_REQUESTED
+  INVENTORY_LOW
+  SHIPMENT_DELAYED
+}
+
+enum NotificationChannel {
+  EMAIL
+  SLACK
+  WHATSAPP
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// Automation Rules
+model AutomationRule {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  trigger     String
+  conditions  Json
+  actions     Json
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  executions AutomationExecution[]
+}
+
+model AutomationExecution {
+  id        String   @id @default(uuid())
+  ruleId    String
+  entityType String
+  entityId   String
+  status    String
+  result    Json?
+  error     String?
+  executedAt DateTime @default(now())
+
+  rule AutomationRule @relation(fields: [ruleId], references: [id])
+
+  @@index([ruleId])
+  @@index([executedAt])
+}
+
+// Audit Log
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  changes    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// Webhook Events
+model WebhookEvent {
+  id            String   @id @default(uuid())
+  shopifyTopic  String
+  shopifyId     String?
+  payload       Json
+  processed     Boolean  @default(false)
+  processedAt   DateTime?
+  error         String?
+  retryCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([processed])
+  @@index([shopifyTopic])
+  @@index([createdAt])
+}
+
