@@ -4,8 +4,16 @@
     <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-10">
       <div class="flex flex-col h-full">
         <!-- Logo -->
-        <div class="flex items-center justify-center h-16 px-4 bg-primary-600">
-          <h1 class="text-xl font-bold text-white">ShopifyGenie OMS</h1>
+        <div class="flex items-center justify-center h-16 px-4 bg-gradient-to-r from-blue-600 to-emerald-600">
+          <img 
+            src="/logo.svg" 
+            alt="ShopifyGenie OMS" 
+            class="w-10 h-10 mr-2"
+          />
+          <div class="flex flex-col">
+            <h1 class="text-lg font-bold text-white leading-tight">ShopifyGenie</h1>
+            <span class="text-xs text-blue-100 font-medium">OMS</span>
+          </div>
         </div>
 
         <!-- Navigation -->

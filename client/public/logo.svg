@@ -1,0 +1,72 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="lampGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1F8EF1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2ECC71;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2ECC71;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#1F8EF1;stop-opacity:0.3" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Glow Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#glowGradient)" opacity="0.2"/>
+  
+  <!-- Magic Lamp Base -->
+  <path d="M85 130 L85 145 Q85 150 90 150 L110 150 Q115 150 115 145 L115 130 Z" 
+        fill="url(#lampGradient)" filter="url(#glow)"/>
+  
+  <!-- Lamp Body -->
+  <ellipse cx="100" cy="120" rx="25" ry="15" fill="url(#lampGradient)" filter="url(#glow)"/>
+  <path d="M75 120 L75 110 Q75 105 80 105 L120 105 Q125 105 125 110 L125 120 Z" 
+        fill="url(#lampGradient)" filter="url(#glow)"/>
+  
+  <!-- Lamp Spout -->
+  <path d="M125 108 Q135 100 140 95 Q145 90 145 85 L150 85 Q152 85 152 87 L152 93 Q152 95 150 95 L145 95 Q143 100 138 105 Q133 110 125 115 Z" 
+        fill="url(#lampGradient)" opacity="0.9"/>
+  
+  <!-- Shopping Bag Integration -->
+  <path d="M130 70 L170 70 L165 110 L135 110 Z" 
+        stroke="#1F8EF1" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M140 70 Q140 55 152.5 55 Q165 55 165 70" 
+        stroke="#1F8EF1" stroke-width="3" fill="none"/>
+  
+  <!-- Data Sync Sparkles -->
+  <circle cx="70" cy="60" r="3" fill="#2ECC71" opacity="0.8">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="85" cy="50" r="2" fill="#1F8EF1" opacity="0.8">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="60" cy="75" r="2.5" fill="#2ECC71" opacity="0.8">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Flow Lines (Data Sync) -->
+  <path d="M60 85 Q70 80 80 85" stroke="#2ECC71" stroke-width="2" fill="none" opacity="0.6" stroke-linecap="round">
+    <animate attributeName="stroke-dasharray" values="0,100;100,0" dur="3s" repeatCount="indefinite"/>
+  </path>
+  <path d="M65 95 Q75 90 85 95" stroke="#1F8EF1" stroke-width="2" fill="none" opacity="0.6" stroke-linecap="round">
+    <animate attributeName="stroke-dasharray" values="0,100;100,0" dur="2.5s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Magic Smoke/Genie Effect -->
+  <path d="M100 100 Q95 85 90 70 Q85 55 80 45" 
+        stroke="url(#lampGradient)" stroke-width="3" fill="none" opacity="0.4" stroke-linecap="round">
+    <animate attributeName="d" 
+             values="M100 100 Q95 85 90 70 Q85 55 80 45;
+                     M100 100 Q105 85 110 70 Q115 55 120 45;
+                     M100 100 Q95 85 90 70 Q85 55 80 45" 
+             dur="4s" repeatCount="indefinite"/>
+  </path>
+</svg>
+

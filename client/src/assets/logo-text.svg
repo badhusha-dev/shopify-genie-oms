@@ -1,0 +1,24 @@
+<svg width="300" height="80" viewBox="0 0 300 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1F8EF1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2ECC71;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- ShopifyGenie Text -->
+  <text x="10" y="35" font-family="'Inter', 'Segoe UI', sans-serif" font-size="28" font-weight="700" fill="url(#textGradient)">
+    ShopifyGenie
+  </text>
+  
+  <!-- OMS Text -->
+  <text x="10" y="60" font-family="'Inter', 'Segoe UI', sans-serif" font-size="22" font-weight="600" fill="#64748B">
+    OMS
+  </text>
+  
+  <!-- Tagline -->
+  <text x="65" y="63" font-family="'Inter', 'Segoe UI', sans-serif" font-size="12" font-weight="400" fill="#94A3B8">
+    Smarter Orders. Seamless Fulfillment.
+  </text>
+</svg>
+

@@ -1,12 +1,20 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-emerald-600 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      <div class="text-center">
+        <!-- Animated Logo -->
+        <div class="flex justify-center mb-6">
+          <img 
+            src="/logo.svg" 
+            alt="ShopifyGenie OMS Logo" 
+            class="w-32 h-32 animate-pulse-slow"
+          />
+        </div>
+        <h2 class="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
           ShopifyGenie OMS
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Order Management System
+        <p class="mt-2 text-sm text-gray-600 font-medium">
+          Smarter Orders. Seamless Fulfillment.
         </p>
       </div>
       <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
