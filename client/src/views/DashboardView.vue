@@ -1,95 +1,150 @@
 <template>
-  <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="card">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Total Orders</p>
-            <p class="text-3xl font-bold text-gray-900">{{ analytics?.totalOrders || 0 }}</p>
-          </div>
-          <div class="p-3 bg-primary-100 rounded-full">
-            <ShoppingBagIcon class="w-8 h-8 text-primary-600" />
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-            <p class="text-3xl font-bold text-gray-900">${{ formatNumber(analytics?.totalRevenue || 0) }}</p>
-          </div>
-          <div class="p-3 bg-green-100 rounded-full">
-            <ChartBarIcon class="w-8 h-8 text-green-600" />
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Avg Order Value</p>
-            <p class="text-3xl font-bold text-gray-900">${{ formatNumber(analytics?.avgOrderValue || 0) }}</p>
-          </div>
-          <div class="p-3 bg-blue-100 rounded-full">
-            <CurrencyDollarIcon class="w-8 h-8 text-blue-600" />
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600">Pending Orders</p>
-            <p class="text-3xl font-bold text-gray-900">{{ pendingOrders }}</p>
-          </div>
-          <div class="p-3 bg-yellow-100 rounded-full">
-            <ClockIcon class="w-8 h-8 text-yellow-600" />
-          </div>
-        </div>
+  <div class="space-y-8">
+    <!-- Welcome Header -->
+    <div
+      v-motion-slide-visible-once-left
+      class="bg-gradient-to-r from-primary via-secondary to-primary rounded-3xl p-8 text-white shadow-2xl shadow-glow relative overflow-hidden"
+    >
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+      <div class="relative z-10">
+        <h1 class="text-5xl font-extrabold font-display mb-3 text-white drop-shadow-lg">Welcome back! 👋</h1>
+        <p class="text-white text-xl font-medium drop-shadow-md">Here's what's happening with your orders today.</p>
       </div>
     </div>
 
+    <!-- Stats Cards using StatCard Component -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Total Orders - Teal -->
+      <StatCard 
+        title="Total Orders"
+        :value="analytics?.totalOrders || 0"
+        :icon="ShoppingBag"
+        :trend="12.5"
+        bg-class="bg-gradient-to-br from-primary to-primary/80 text-white"
+        icon-bg-class="bg-white/20"
+        icon-class="text-white"
+        title-class="text-white/80"
+        value-class="text-white"
+        :delay="100"
+      />
+
+      <!-- Total Revenue - Blue -->
+      <StatCard 
+        title="Total Revenue"
+        :value="`$${formatNumber(analytics?.totalRevenue || 0)}`"
+        :icon="DollarSign"
+        :trend="8.2"
+        bg-class="bg-gradient-to-br from-secondary to-secondary/80 text-white"
+        icon-bg-class="bg-white/20"
+        icon-class="text-white"
+        title-class="text-white/80"
+        value-class="text-white"
+        :delay="200"
+      />
+
+      <!-- Avg Order Value - Purple -->
+      <StatCard 
+        title="Avg Order Value"
+        :value="`$${formatNumber(analytics?.avgOrderValue || 0)}`"
+        :icon="TrendingUp"
+        :trend="-2.4"
+        bg-class="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
+        icon-bg-class="bg-white/20"
+        icon-class="text-white"
+        title-class="text-white/80"
+        value-class="text-white"
+        :delay="300"
+      />
+
+      <!-- Pending Orders - Orange -->
+      <StatCard 
+        title="Pending Orders"
+        :value="pendingOrders"
+        :icon="Clock"
+        badge="Urgent"
+        bg-class="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
+        icon-bg-class="bg-white/20"
+        icon-class="text-white"
+        title-class="text-white/80"
+        value-class="text-white"
+        :delay="400"
+      />
+    </div>
+
     <!-- Recent Orders -->
-    <div class="card">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold text-gray-900">Recent Orders</h2>
-        <RouterLink to="/orders" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
-          View all →
+    <div
+      v-motion-slide-visible-once-right
+      class="bg-lightSurface dark:bg-darkSurface rounded-3xl shadow-xl p-6 border border-gray-200 dark:border-gray-700"
+    >
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-3xl font-extrabold text-primary dark:text-secondary font-display">Recent Orders</h2>
+          <p class="text-base font-semibold text-gray-800 dark:text-gray-100 mt-2">Your latest customer orders</p>
+        </div>
+        <RouterLink
+          to="/orders"
+          class="flex items-center px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg shadow-glow transition-all duration-200 hover:scale-105 font-medium"
+        >
+          View all
+          <ArrowRight :size="16" class="ml-2" />
         </RouterLink>
       </div>
 
-      <div v-if="loading" class="text-center py-8">
-        <p class="text-gray-500">Loading...</p>
+      <div v-if="loading" class="text-center py-12">
+        <Loader2 :size="56" class="text-primary dark:text-secondary mb-4 animate-spin mx-auto" />
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">Loading orders...</p>
       </div>
 
-      <div v-else-if="recentOrders.length === 0" class="text-center py-8">
-        <p class="text-gray-500">No recent orders</p>
+      <div v-else-if="recentOrders.length === 0" class="text-center py-12">
+        <Inbox :size="80" class="text-gray-500 dark:text-gray-400 mb-4 mx-auto" />
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">No recent orders</p>
       </div>
 
       <div v-else class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
+          <thead class="bg-gray-100 dark:bg-gray-800">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-4 text-left text-sm font-extrabold text-black dark:text-white uppercase tracking-wider">
+                <Hash :size="16" class="inline mr-2" />Order
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-extrabold text-black dark:text-white uppercase tracking-wider">
+                <User :size="16" class="inline mr-2" />Customer
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-extrabold text-black dark:text-white uppercase tracking-wider">
+                <DollarSign :size="16" class="inline mr-2" />Total
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-extrabold text-black dark:text-white uppercase tracking-wider">
+                <Info :size="16" class="inline mr-2" />Status
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-extrabold text-black dark:text-white uppercase tracking-wider">
+                <Calendar :size="16" class="inline mr-2" />Date
+              </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="order in recentOrders" :key="order.id" class="hover:bg-gray-50 cursor-pointer" @click="$router.push(`/orders/${order.id}`)">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.orderNumber }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customerName }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.currency }} {{ order.totalAmount }}</td>
+                <tbody class="bg-lightSurface dark:bg-darkSurface divide-y divide-gray-200 dark:divide-gray-700">
+            <tr
+              v-for="order in recentOrders"
+              :key="order.id"
+                      class="hover:bg-primary/10 dark:hover:bg-secondary/20 cursor-pointer transition-colors duration-150"
+              @click="$router.push(`/orders/${order.id}`)"
+            >
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-base font-extrabold text-primary dark:text-secondary">
+                  {{ order.orderNumber }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-base font-bold text-black dark:text-white">
+                {{ order.customerName }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-base font-extrabold text-black dark:text-white">
+                {{ order.currency }} {{ order.totalAmount }}
+              </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="getStatusBadgeClass(order.orderStatus)">{{ order.orderStatus }}</span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDate(order.createdAt) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-base font-bold text-gray-800 dark:text-gray-200">
+                {{ formatDate(order.createdAt) }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -99,16 +154,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { computed } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { RouterLink } from 'vue-router'
-import {
-  ShoppingBagIcon,
-  ChartBarIcon,
-  CurrencyDollarIcon,
-  ClockIcon,
-} from '@heroicons/vue/24/outline'
+import { ShoppingBag, DollarSign, TrendingUp, TrendingDown, Clock, Minus, ArrowRight, Hash, User, Info, Calendar, Loader2, Inbox } from 'lucide-vue-next'
+import StatCard from '@/components/StatCard.vue'
 
 const ORDERS_QUERY = gql`
   query GetOrders {

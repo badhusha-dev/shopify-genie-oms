@@ -1,16 +1,16 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Gradient Definitions -->
+  <!-- Gradient Definitions for Dark Mode -->
   <defs>
-    <linearGradient id="genieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1F8EF1;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2ECC71;stop-opacity:1" />
+    <linearGradient id="genieGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60D9FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4FFFB0;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="lampGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2ECC71;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#00C4B4;stop-opacity:1" />
+    <linearGradient id="lampGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FFFB0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00E5CC;stop-opacity:1" />
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+    <filter id="glowDark">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -19,33 +19,33 @@
   </defs>
   
   <!-- Magic Genie Lamp Base -->
-  <g filter="url(#glow)">
+  <g filter="url(#glowDark)">
     <!-- Lamp Body -->
     <path d="M 64 85 Q 50 85 45 78 Q 42 73 42 68 L 42 52 Q 42 47 45 44 Q 50 40 64 40 Q 78 40 83 44 Q 86 47 86 52 L 86 68 Q 86 73 83 78 Q 78 85 64 85 Z" 
-          fill="url(#lampGradient)" opacity="0.9"/>
+          fill="url(#lampGradientDark)" opacity="0.95"/>
     
     <!-- Lamp Spout -->
     <path d="M 86 56 Q 92 54 96 52 Q 98 51 98 48 Q 98 45 96 44 Q 92 42 86 42 Z" 
-          fill="url(#lampGradient)"/>
+          fill="url(#lampGradientDark)"/>
     
     <!-- Lamp Handle -->
     <path d="M 42 56 Q 36 54 32 52 Q 30 51 30 48 Q 30 45 32 44 Q 36 42 42 42 Z" 
-          fill="url(#lampGradient)"/>
+          fill="url(#lampGradientDark)"/>
     
     <!-- Lamp Base -->
-    <ellipse cx="64" cy="85" rx="24" ry="6" fill="url(#lampGradient)" opacity="0.8"/>
+    <ellipse cx="64" cy="85" rx="24" ry="6" fill="url(#lampGradientDark)" opacity="0.85"/>
   </g>
   
   <!-- Shopping Bag Icon Integration -->
   <g opacity="0.95">
     <!-- Bag -->
-    <rect x="52" y="32" width="24" height="28" rx="2" fill="url(#genieGradient)" opacity="0.3"/>
+    <rect x="52" y="32" width="24" height="28" rx="2" fill="url(#genieGradientDark)" opacity="0.35"/>
     <path d="M 56 32 L 56 28 Q 56 22 64 22 Q 72 22 72 28 L 72 32" 
-          stroke="url(#genieGradient)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          stroke="url(#genieGradientDark)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   </g>
   
-  <!-- Magic Sparkles -->
-  <g fill="url(#genieGradient)" opacity="0.8">
+  <!-- Magic Sparkles (brighter for dark mode) -->
+  <g fill="url(#genieGradientDark)" opacity="0.9">
     <!-- Top sparkles -->
     <circle cx="48" cy="25" r="2"/>
     <circle cx="80" cy="28" r="2.5"/>
@@ -59,8 +59,8 @@
     <circle cx="73" cy="92" r="1.5"/>
   </g>
   
-  <!-- Sync Orbits (representing automation) -->
-  <g stroke="url(#genieGradient)" stroke-width="1.5" fill="none" opacity="0.4">
+  <!-- Sync Orbits -->
+  <g stroke="url(#genieGradientDark)" stroke-width="1.5" fill="none" opacity="0.5">
     <ellipse cx="64" cy="60" rx="35" ry="35" stroke-dasharray="4 4">
       <animateTransform
         attributeName="transform"
@@ -72,7 +72,8 @@
     </ellipse>
   </g>
   
-  <!-- Text: SG Monogram (optional subtle) -->
+  <!-- Text: SG Monogram -->
   <text x="64" y="110" font-family="Poppins, sans-serif" font-size="16" font-weight="600" 
-        fill="url(#genieGradient)" text-anchor="middle" opacity="0.7">SG</text>
+        fill="url(#genieGradientDark)" text-anchor="middle" opacity="0.8">SG</text>
 </svg>
+

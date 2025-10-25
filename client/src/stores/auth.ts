@@ -1,37 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { apolloClient } from '@/apollo'
-import { gql } from '@apollo/client/core'
-import { useRouter } from 'vue-router'
-
-const LOGIN_MUTATION = gql`
-  mutation Login($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
-      token
-      user {
-        id
-        email
-        firstName
-        lastName
-        role
-      }
-    }
-  }
-`
-
-const ME_QUERY = gql`
-  query Me {
-    me {
-      id
-      email
-      firstName
-      lastName
-      role
-      isActive
-      createdAt
-    }
-  }
-`
+import api from '@/services/api'
 
 export interface User {
   id: string
@@ -55,15 +24,12 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(email: string, password: string) {
     loading.value = true
     try {
-      const { data } = await apolloClient.mutate({
-        mutation: LOGIN_MUTATION,
-        variables: { email, password },
-      })
+      const { data } = await api.post('/auth/login', { email, password })
 
-      if (data?.login) {
-        token.value = data.login.token
-        user.value = data.login.user
-        localStorage.setItem('token', data.login.token)
+      if (data) {
+        token.value = data.token
+        user.value = data.user
+        localStorage.setItem('token', data.token)
         return true
       }
       return false
@@ -75,17 +41,40 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function register(email: string, password: string, firstName: string, lastName: string, role: string = 'SUPPORT') {
+    loading.value = true
+    try {
+      const { data } = await api.post('/auth/register', { 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        role 
+      })
+
+      if (data) {
+        token.value = data.token
+        user.value = data.user
+        localStorage.setItem('token', data.token)
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Register error:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function fetchUser() {
     if (!token.value) return
 
     try {
-      const { data } = await apolloClient.query({
-        query: ME_QUERY,
-        fetchPolicy: 'network-only',
-      })
+      const { data } = await api.get('/auth/me')
 
-      if (data?.me) {
-        user.value = data.me
+      if (data) {
+        user.value = data
       }
     } catch (error) {
       console.error('Fetch user error:', error)
@@ -93,11 +82,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout() {
-    token.value = null
-    user.value = null
-    localStorage.removeItem('token')
-    apolloClient.clearStore()
+  async function logout() {
+    try {
+      await api.post('/auth/logout')
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      token.value = null
+      user.value = null
+      localStorage.removeItem('token')
+    }
   }
 
   return {
@@ -108,6 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     isManager,
     login,
+    register,
     fetchUser,
     logout,
   }

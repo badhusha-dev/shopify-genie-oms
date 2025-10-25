@@ -19,10 +19,43 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders         Order[]
-  fulfillments   Fulfillment[]
-  returnRequests ReturnRequest[]
-  auditLogs      AuditLog[]
+  orders          Order[]
+  fulfillments    Fulfillment[]
+  returnRequests  ReturnRequest[]
+  auditLogs       AuditLog[]
+  refreshTokens   RefreshToken[]
+  passwordResets  PasswordReset[]
+}
+
+// Refresh Token for JWT rotation
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  meta      Json?    // user-agent, ip, etc.
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// Password Reset Tokens
+model PasswordReset {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
 }
 
 enum UserRole {
@@ -38,16 +71,17 @@ model Store {
   name             String
   shopifyDomain    String   @unique
   shopifyStoreId   String   @unique
-  accessToken      String
+  encryptedToken   String   // Encrypted Shopify access token
   scopes           String
   isActive         Boolean  @default(true)
   lastSyncAt       DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  orders       Order[]
-  products     Product[]
-  inventoryItems InventoryItem[]
+  orders          Order[]
+  products        Product[]
+  shopifyProducts ShopifyProduct[] @relation("ShopifyProducts")
+  inventoryItems  InventoryItem[]
 }
 
 // Order Management
@@ -149,7 +183,57 @@ enum OrderItemFulfillmentStatus {
   RETURNED
 }
 
-// Product Catalog
+// Product Catalog (Shopify Master Products)
+model ShopifyProduct {
+  id             String                  @id @default(uuid())
+  shopifyId      String                  @unique
+  storeId        String
+  title          String
+  handle         String?
+  productType    String?
+  vendor         String?
+  status         String                  @default("active")
+  tags           String[]
+  imageUrl       String?
+  description    String?                 @db.Text
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  store          Store                   @relation("ShopifyProducts", fields: [storeId], references: [id])
+  variants       ShopifyProductVariant[]
+
+  @@index([storeId])
+  @@index([shopifyId])
+  @@index([handle])
+}
+
+// Product Variants (Shopify Product Options/SKUs)
+model ShopifyProductVariant {
+  id                String          @id @default(uuid())
+  shopifyId         String          @unique
+  productId         String
+  title             String
+  sku               String?
+  price             Decimal         @db.Decimal(10, 2)
+  compareAtPrice    Decimal?        @db.Decimal(10, 2)
+  inventoryQty      Int             @default(0)
+  inventoryPolicy   String?
+  barcode           String?
+  weight            Decimal?        @db.Decimal(10, 3)
+  weightUnit        String?         @default("kg")
+  position          Int?
+  imageUrl          String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  product           ShopifyProduct  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([shopifyId])
+  @@index([sku])
+}
+
+// Legacy Product Catalog (kept for backward compatibility)
 model Product {
   id              String   @id @default(uuid())
   shopifyProductId String? @unique

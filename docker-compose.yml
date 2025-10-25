@@ -1,117 +1,36 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
-    container_name: shopify-oms-db
+    image: postgres:15
+    container_name: shopifygenie_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: shopify_genie_oms
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_USER: shopify
+      POSTGRES_PASSWORD: shopify_pass
+      POSTGRES_DB: shopifygenie
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - shopify-oms-network
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U shopify"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: shopify-oms-redis
+    container_name: shopifygenie_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - shopify-oms-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 5s
+      timeout: 3s
       retries: 5
 
-  # Backend API Server
-  server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: shopify-oms-server
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    environment:
-      NODE_ENV: production
-      PORT: 4000
-      DATABASE_URL: postgresql://postgres:postgres_password@postgres:5432/shopify_genie_oms
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-your-production-jwt-secret}
-      SHOPIFY_API_KEY: ${SHOPIFY_API_KEY}
-      SHOPIFY_API_SECRET: ${SHOPIFY_API_SECRET}
-      SHOPIFY_ACCESS_TOKEN: ${SHOPIFY_ACCESS_TOKEN}
-      SHOPIFY_SHOP_DOMAIN: ${SHOPIFY_SHOP_DOMAIN}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - shopify-oms-network
-    volumes:
-      - ./server/logs:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Frontend Client
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: shopify-oms-client
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-    environment:
-      VITE_GRAPHQL_URL: http://localhost:4000/graphql
-    depends_on:
-      - server
-    networks:
-      - shopify-oms-network
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: shopify-oms-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - server
-      - client
-    networks:
-      - shopify-oms-network
-
-networks:
-  shopify-oms-network:
-    driver: bridge
-
 volumes:
-  postgres_data:
-  redis_data:
-
+  pgdata:

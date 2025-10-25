@@ -10,8 +10,6 @@ import { errorHandler } from './middleware/error';
 import { typeDefs } from './graphql/schemas';
 import { resolvers } from './graphql/resolvers';
 import { createContext } from './graphql/context';
-import { handleWebhook } from './integrations/shopify/webhooks';
-
 const app: Application = express();
 
 // Trust proxy
@@ -42,12 +40,23 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
-// Webhook endpoint (raw body needed for signature verification)
-app.post('/api/webhooks/shopify', express.raw({ type: 'application/json' }), handleWebhook);
+// Shopify Webhook Routes (MUST be before JSON body parser)
+// Raw body is required for HMAC verification
+import webhookRoutes from './routes/webhookRoutes';
+app.use('/api/shopify/webhooks', express.raw({ type: 'application/json' }), webhookRoutes);
 
 // Body parser for other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// REST API Routes
+import authRoutes from './routes/authRoutes';
+import productRoutes from './routes/productRoutes';
+import webhookAdminRoutes from './routes/webhookAdminRoutes';
+
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/admin/webhooks', webhookAdminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
